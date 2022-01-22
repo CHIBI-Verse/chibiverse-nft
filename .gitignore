@@ -1,0 +1,14 @@
+assets/*
+!assets/.gitkeep
+logs/*
+!logs/.gitkeep
+docker-volume/*
+!docker-volume/.gitkeep
+
+coverage/
+build/
+node_modules/
+
+yarn.lock
+types
+.env
