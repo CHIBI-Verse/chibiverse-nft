@@ -3,6 +3,7 @@ version: '3.4'
 services:
   ipfs_host:
     image: 'ipfs/go-ipfs:latest'
+    restart: always
     ports:
       - '4001:4001'
       - '5001:5001'

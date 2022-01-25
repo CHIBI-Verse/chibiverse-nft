@@ -23,6 +23,8 @@ const {
 } = config;
 const Logger = setLogger('uploader');
 
+let rootDirectoryCid;
+
 const upload = (minty) => async (req, res, next) => {
   try {
     const { params } = req;
@@ -35,7 +37,7 @@ const upload = (minty) => async (req, res, next) => {
       `../../assets/json/${tokenID}.json`,
     );
 
-    console.log({ metadata, tokenID });
+    // console.log({ metadata, tokenID });
 
     if (fs.existsSync(metadata_path)) {
       metadata = fs.readFileSync(metadata_path, 'utf-8');
@@ -48,13 +50,25 @@ const upload = (minty) => async (req, res, next) => {
         },
       );
 
+      // console.log({ metadata });
+
       // let rootDirectoryStats = await minty.ipfs.files.stat('/');
       // console.log({ rootDirectoryStats });
+
+      // let rootDirectoryContents = await all(minty.ipfs.files.ls('/'));
+      // console.log({ rootDirectoryContents });
+
+      const pinned = await minty.pin(
+        `ipfs://${rootDirectoryCid}/${tokenID}.json`,
+      );
 
       // const metadataURI =
       //   minty.ensureIpfsUriPrefix(metadataCid) + `/${tokenID}.json`;
       console.log({
-        metadataURI: `ipfs://QmfYza3wYKrQ7jGa1Gxqe6z2r6wFC2W3ejCSShsucGRFWk/${tokenID}.json`,
+        pinned,
+        metadata: `ipfs://${rootDirectoryCid}/${tokenID}.json`,
+        metadataURI: `http://127.0.0.1:8080/ipfs/${rootDirectoryCid}/${tokenID}.json`,
+        // metadataCid,
       });
       //file exists
     }
@@ -110,53 +124,53 @@ async function init() {
     // await minty.ipfs.files.mkdir(`/${IMAGES_DIR}`, { parents: true });
     // await minty.ipfs.files.mkdir(`/${ANIMATION_DIR}`, { parents: true });
 
-    let rootDirectoryContents = await all(minty.ipfs.files.ls('/'));
-    console.log({ rootDirectoryContents });
+    // let rootDirectoryContents = await all(minty.ipfs.files.ls('/'));
+    // console.log({ rootDirectoryContents });
     let rootDirectoryStats = await minty.ipfs.files.stat('/');
     console.log({ rootDirectoryStats });
+    rootDirectoryCid = rootDirectoryStats.cid;
+    // const imagesDir = _.find(
+    //   rootDirectoryContents,
+    //   (o) => o.type === 'directory' && o.name === IMAGES_DIR,
+    // );
 
-    const imagesDir = _.find(
-      rootDirectoryContents,
-      (o) => o.type === 'directory' && o.name === IMAGES_DIR,
-    );
+    // if (!imagesDir) {
+    //   Logger.error(`fatal /${IMAGES_DIR} not found`);
+    //   return process.exit(1);
+    // }
 
-    if (!imagesDir) {
-      Logger.error(`fatal /${IMAGES_DIR} not found`);
-      return process.exit(1);
-    }
+    // const animationDir = _.find(
+    //   rootDirectoryContents,
+    //   (o) => o.type === 'directory' && o.name === ANIMATION_DIR,
+    // );
 
-    const animationDir = _.find(
-      rootDirectoryContents,
-      (o) => o.type === 'directory' && o.name === ANIMATION_DIR,
-    );
+    // if (!animationDir) {
+    //   Logger.error(`fatal /${ANIMATION_DIR} not found`);
+    //   return process.exit(1);
+    // }
 
-    if (!animationDir) {
-      Logger.error(`fatal /${ANIMATION_DIR} not found`);
-      return process.exit(1);
-    }
+    // if (_.toString(rootDirectoryStats.cid) !== ROOT_DIR_CID) {
+    //   Logger.error(`fatal / [${rootDirectoryStats.cid}] != [${ROOT_DIR_CID}]`);
+    //   return process.exit(1);
+    // }
+    // if (_.toString(imagesDir.cid) !== IMAGES_DIR_CID) {
+    //   Logger.error(
+    //     `fatal /${imagesDir.name} [${imagesDir.cid}] != [${IMAGES_DIR_CID}]`,
+    //   );
+    //   return process.exit(1);
+    // }
+    // if (_.toString(animationDir.cid) !== ANIMATION_DIR_CID) {
+    //   Logger.error(
+    //     `fatal /${animationDir.name} [${animationDir.cid}] != [${ANIMATION_DIR_CID}]`,
+    //   );
+    //   return process.exit(1);
+    // }
 
-    if (_.toString(rootDirectoryStats.cid) !== ROOT_DIR_CID) {
-      Logger.error(`fatal / [${rootDirectoryStats.cid}] != [${ROOT_DIR_CID}]`);
-      return process.exit(1);
-    }
-    if (_.toString(imagesDir.cid) !== IMAGES_DIR_CID) {
-      Logger.error(
-        `fatal /${imagesDir.name} [${imagesDir.cid}] != [${IMAGES_DIR_CID}]`,
-      );
-      return process.exit(1);
-    }
-    if (_.toString(animationDir.cid) !== ANIMATION_DIR_CID) {
-      Logger.error(
-        `fatal /${animationDir.name} [${animationDir.cid}] != [${ANIMATION_DIR_CID}]`,
-      );
-      return process.exit(1);
-    }
-
-    console.log(`${rootDirectoryStats.type} / | ${rootDirectoryStats.cid}`);
-    console.log(`${imagesDir.type} /${imagesDir.name} | ${imagesDir.cid}`);
-    console.log(
-      `${animationDir.type} /${animationDir.name} | ${animationDir.cid}`,
-    );
+    // console.log(`${rootDirectoryStats.type} / | ${rootDirectoryStats.cid}`);
+    // console.log(`${imagesDir.type} /${imagesDir.name} | ${imagesDir.cid}`);
+    // console.log(
+    //   `${animationDir.type} /${animationDir.name} | ${animationDir.cid}`,
+    // );
 
     app.get(
       '/api/upload/:tokenID',
