@@ -25,9 +25,6 @@ test-js:
 ganache:
 	ganache-cli --mnemonic "${SEED_GANACHE}"
 
-ipfs-daemon:
-	jsipfs daemon
-
 gen-pass:
 	date +%s | sha256sum | base64 | head -c 32 ; echo
 
@@ -43,10 +40,7 @@ watcher:
 	go run cmd/watcher/main.go
 deployer:
 	go run cmd/deployer/main.go
-uploader:
-	node cmd/uploader
-dev-uploader:
-	npx nodemon -e js,json --exec make uploader --signal SIGTERM 
+
 truffle-compile:
 	yarn truffle compile
 	yarn run typechain --target=web3-v1 'build/contracts/*.json'
