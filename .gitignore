@@ -12,3 +12,5 @@ node_modules/
 yarn.lock
 types
 .env
+
+ipfs_submarine
