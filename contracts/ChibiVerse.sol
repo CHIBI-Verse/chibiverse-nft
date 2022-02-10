@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract ChibiVerse is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
@@ -13,7 +13,8 @@ contract ChibiVerse is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
     using Counters for Counters.Counter;
 
     // CONSTANT
-    string public constant PROVENANCE = "";
+    string public constant PROVENANCE =
+        "1c96ec246a8dc70486fe93748c35ce97b2269ba4bfabe9c81d6e3835cc2d6ecd";
     uint256 public constant MAX_CHIBI_PURCHASE = 20; // Max Chibi can mint per tx
     // uint256 public constant MAX_CHIBI = 10000; // Max supply of Minted Chibi
     uint256 public constant MAX_CHIBI = 100; // Max supply of Minted Chibi
@@ -36,7 +37,9 @@ contract ChibiVerse is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
     {
         setUriPrefix(_uriPrefix);
         setUriSuffix(_uriSuffix);
-        setHiddenMetadataUri("ipfs://__CID__/hidden");
+        setHiddenMetadataUri(
+            "ipfs://QmNs3r2n1TMCb38f9Y5bETWgmvSJx15h9MHWYBubj85fjQ"
+        );
     }
 
     // modifier
