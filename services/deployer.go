@@ -27,7 +27,7 @@ func (svc *Deployer) Deploy() error {
 	}
 
 	// 1. Deploy TokenA contract
-	chibiverseAddr, _, _, err := chibiverse.DeployChibiverse(utils.MySendOpt(client, network), client)
+	chibiverseAddr, _, _, err := chibiverse.DeployChibiverse(utils.MySendOpt(client, network), client, "", "")
 	if err != nil {
 		return utils.LogE(err)
 	}

@@ -3,6 +3,7 @@ import Web3 from 'web3';
 export const gasLimit = 6721975;
 
 export interface TestActors {
+  accounts: string[];
   ownerAddr: string;
   ownerTx: any;
   acc1Addr: string;
@@ -16,6 +17,7 @@ export const testActors = async (web3: Web3): Promise<TestActors> => {
   const accounts = await web3.eth.getAccounts();
 
   return {
+    accounts,
     ownerAddr: accounts[0],
     ownerTx: { from: accounts[0], gas: gasLimit },
     acc1Addr: accounts[1],

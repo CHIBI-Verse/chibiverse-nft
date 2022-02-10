@@ -1,107 +1,116 @@
 // SPDX-License-Identifier: MIT
+pragma solidity >=0.4.22 <0.9.0;
 
-// Amended by HashLips
-/**
-    !Disclaimer!
-
-    These contracts have been used to create tutorials,
-    and was created for the purpose to teach people
-    how to create smart contracts on the blockchain.
-    please review this code on your own before using any of
-    the following code for production.
-    The developer will not be responsible or liable for all loss or 
-    damage whatsoever caused by you participating in any way in the 
-    experimental code, whether putting money into the contract or 
-    using the code for your own project.
-*/
-
-pragma solidity >=0.7.0 <0.9.0;
-
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract ChibiVerse is ERC721, Ownable {
+contract ChibiVerse is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
     using Strings for uint256;
     using Counters for Counters.Counter;
 
+    // CONSTANT
+    string public constant PROVENANCE = "";
+    uint256 public constant MAX_CHIBI_PURCHASE = 20; // Max Chibi can mint per tx
+    // uint256 public constant MAX_CHIBI = 10000; // Max supply of Minted Chibi
+    uint256 public constant MAX_CHIBI = 100; // Max supply of Minted Chibi
+    uint256 public constant PRICE = 0.006 ether; // Chibi price - 0.006 ETH
+    uint256 public constant GIEVAWAY_RESERVE = 50;
+
     Counters.Counter private supply;
+    Counters.Counter private gievawaySupply;
+    string private uriPrefix = "";
+    string private uriSuffix = "";
+    string private hiddenMetadataUri;
 
-    string public uriPrefix = "";
-    string public uriSuffix = ".json";
-    string public hiddenMetadataUri;
-
-    uint256 public cost = 0.01 ether;
-    uint256 public maxSupply = 50;
-    uint256 public maxMintAmountPerTx = 5;
-
-    bool public paused = true;
     bool public revealed = false;
 
-    constructor() ERC721("NAME", "SYMBOL") {
-        setHiddenMetadataUri("ipfs://__CID__/hidden.json");
+    mapping(address => bool) giveawayList;
+    mapping(address => bool) claimedList;
+
+    constructor(string memory _uriPrefix, string memory _uriSuffix)
+        ERC721("ChibiVerse", "CHIBI")
+    {
+        setUriPrefix(_uriPrefix);
+        setUriSuffix(_uriSuffix);
+        setHiddenMetadataUri("ipfs://__CID__/hidden");
     }
 
+    // modifier
     modifier mintCompliance(uint256 _mintAmount) {
+        require(!paused(), "The contract is paused!");
+        require(tx.origin == _msgSender(), "Contracts not allowed");
         require(
-            _mintAmount > 0 && _mintAmount <= maxMintAmountPerTx,
+            _isContract(_msgSender()) == false,
+            "Cannot mint from a contract"
+        );
+        require(
+            _mintAmount > 0 && _mintAmount <= MAX_CHIBI_PURCHASE,
             "Invalid mint amount!"
         );
         require(
-            supply.current() + _mintAmount <= maxSupply,
+            supply.current() + _mintAmount <= MAX_CHIBI,
             "Max supply exceeded!"
         );
         _;
     }
 
-    function totalSupply() public view returns (uint256) {
-        return supply.current();
+    modifier onlyGiveawayListed() {
+        require(_isGiveawayListed(_msgSender()), "Only giveaway listed!");
+        _;
     }
 
-    function mint(uint256 _mintAmount)
-        public
-        payable
-        mintCompliance(_mintAmount)
-    {
-        require(!paused, "The contract is paused!");
-        require(msg.value >= cost * _mintAmount, "Insufficient funds!");
-
-        _mintLoop(msg.sender, _mintAmount);
+    modifier onlyClaimable(address _address) {
+        require(_claimable(_address), "Don't claim again!");
+        _;
     }
 
-    function mintForAddress(uint256 _mintAmount, address _receiver)
-        public
-        mintCompliance(_mintAmount)
-        onlyOwner
-    {
-        _mintLoop(_receiver, _mintAmount);
+    // internal method
+    function _isGiveawayListed(address _address) internal view returns (bool) {
+        return giveawayList[_address];
     }
 
-    function walletOfOwner(address _owner)
-        public
-        view
-        returns (uint256[] memory)
-    {
-        uint256 ownerTokenCount = balanceOf(_owner);
-        uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
-        uint256 currentTokenId = 1;
-        uint256 ownedTokenIndex = 0;
+    function _claimable(address _address) internal view returns (bool) {
+        return !claimedList[_address];
+    }
 
-        while (
-            ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply
-        ) {
-            address currentTokenOwner = ownerOf(currentTokenId);
+    function _addToClaimedList(address _address) internal {
+        claimedList[_address] = true;
+    }
 
-            if (currentTokenOwner == _owner) {
-                ownedTokenIds[ownedTokenIndex] = currentTokenId;
+    function _addGiveawayList(address _address) internal {
+        giveawayList[_address] = true;
+    }
 
-                ownedTokenIndex++;
-            }
+    function _removeGiveawayList(address _address) internal {
+        giveawayList[_address] = false;
+    }
 
-            currentTokenId++;
+    function _isContract(address account) internal view returns (bool) {
+        uint256 size;
+        assembly {
+            size := extcodesize(account)
         }
+        return size > 0;
+    }
 
-        return ownedTokenIds;
+    function _mintLoop(address _receiver, uint256 _mintAmount) internal {
+        for (uint256 i = 0; i < _mintAmount; i++) {
+            supply.increment();
+            _safeMint(_receiver, supply.current());
+        }
+    }
+
+    // override
+    function _baseURI() internal view virtual override returns (string memory) {
+        return uriPrefix;
+    }
+
+    function totalSupply() public view override returns (uint256) {
+        return supply.current();
     }
 
     function tokenURI(uint256 _tokenId)
@@ -120,32 +129,56 @@ contract ChibiVerse is ERC721, Ownable {
             return hiddenMetadataUri;
         }
 
-        string memory currentBaseURI = _baseURI();
         return
-            bytes(currentBaseURI).length > 0
-                ? string(
-                    abi.encodePacked(
-                        currentBaseURI,
-                        _tokenId.toString(),
-                        uriSuffix
-                    )
-                )
-                : "";
+            string(
+                abi.encodePacked(_baseURI(), _tokenId.toString(), uriSuffix)
+            );
     }
 
-    function setRevealed(bool _state) public onlyOwner {
-        revealed = _state;
-    }
-
-    function setCost(uint256 _cost) public onlyOwner {
-        cost = _cost;
-    }
-
-    function setMaxMintAmountPerTx(uint256 _maxMintAmountPerTx)
+    function mint(uint256 _mintAmount)
         public
-        onlyOwner
+        payable
+        nonReentrant
+        mintCompliance(_mintAmount)
     {
-        maxMintAmountPerTx = _maxMintAmountPerTx;
+        require(msg.value >= PRICE * _mintAmount, "Insufficient funds!");
+
+        _mintLoop(_msgSender(), _mintAmount);
+    }
+
+    function claim()
+        public
+        nonReentrant
+        onlyClaimable(_msgSender())
+        onlyGiveawayListed
+        mintCompliance(1)
+    {
+        require(
+            gievawaySupply.current() + 1 <= GIEVAWAY_RESERVE,
+            "Max gievaway supply exceeded!"
+        );
+        _mintLoop(_msgSender(), 1);
+        _removeGiveawayList(_msgSender());
+        _addToClaimedList(_msgSender());
+        gievawaySupply.increment();
+    }
+
+    function walletOfOwner(address _owner)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint256 tokenCount = balanceOf(_owner);
+
+        uint256[] memory tokensId = new uint256[](tokenCount);
+        for (uint256 i; i < tokenCount; i++) {
+            tokensId[i] = tokenOfOwnerByIndex(_owner, i);
+        }
+        return tokensId;
+    }
+
+    function setRevealed() public onlyOwner {
+        revealed = true;
     }
 
     function setHiddenMetadataUri(string memory _hiddenMetadataUri)
@@ -163,36 +196,32 @@ contract ChibiVerse is ERC721, Ownable {
         uriSuffix = _uriSuffix;
     }
 
-    function setPaused(bool _state) public onlyOwner {
-        paused = _state;
+    function claimable(address _address) public view returns (bool) {
+        return _claimable(_address) && _isGiveawayListed(_address);
     }
 
-    function withdraw() public onlyOwner {
-        // This will pay HashLips 5% of the initial sale.
-        // You can remove this if you want, or keep it in to support HashLips and his channel.
-        // =============================================================================
-        (bool hs, ) = payable(0xD7712f718C30a132B55C81ce0CA4C9C83EE70027).call{
-            value: (address(this).balance * 5) / 100
-        }("");
-        require(hs);
-        // =============================================================================
+    function addToGiveawayList(address _address)
+        public
+        onlyClaimable(_address)
+        onlyOwner
+    {
+        _addGiveawayList(_address);
+    }
 
-        // This will transfer the remaining contract balance to the owner.
-        // Do not remove this otherwise you will not be able to withdraw the funds.
-        // =============================================================================
+    function removeGiveawayList(address _address) public onlyOwner {
+        _removeGiveawayList(_address);
+    }
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function withdraw() public nonReentrant onlyOwner {
         (bool os, ) = payable(owner()).call{value: address(this).balance}("");
         require(os);
-        // =============================================================================
-    }
-
-    function _mintLoop(address _receiver, uint256 _mintAmount) internal {
-        for (uint256 i = 0; i < _mintAmount; i++) {
-            supply.increment();
-            _safeMint(_receiver, supply.current());
-        }
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return uriPrefix;
     }
 }

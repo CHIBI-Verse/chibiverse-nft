@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/CHIBI-Verse/chibiverse-nft/bindings/chibiverse"
 	"github.com/CHIBI-Verse/chibiverse-nft/consts"
 	"github.com/CHIBI-Verse/chibiverse-nft/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 type Writer struct {
@@ -48,7 +48,7 @@ func (svc *Writer) Write() error {
 	}
 	utils.Print("TotalSupply = %s", totalSupply)
 
-	cost, err := chibiverseContract.Cost(&bind.CallOpts{})
+	cost, err := chibiverseContract.PRICE(&bind.CallOpts{})
 	if err != nil {
 		return utils.LogE(err)
 	}
@@ -62,7 +62,7 @@ func (svc *Writer) Write() error {
 	fmt.Println("Paused = ", paused)
 
 	if paused {
-		_, err = chibiverseContract.SetPaused(utils.MySendOpt(client, network), false)
+		_, err = chibiverseContract.Unpause(utils.MySendOpt(client, network))
 		if err != nil {
 			return utils.LogE(err)
 		}

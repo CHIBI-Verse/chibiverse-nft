@@ -44,6 +44,7 @@ deployer:
 truffle-compile:
 	yarn truffle compile
 	yarn run typechain --target=web3-v1 'build/contracts/*.json'
+	if [ ! -d abigenBindings ]; then mkdir abigenBindings ; fi
 	yarn truffle run abigen
 	if [ ! -d bindings ]; then mkdir bindings ; fi
 	if [ ! -d bindings/chibiverse ]; then mkdir bindings/chibiverse ; fi

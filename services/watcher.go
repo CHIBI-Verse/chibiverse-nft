@@ -7,14 +7,15 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/CHIBI-Verse/chibiverse-nft/bindings/chibiverse"
 	"github.com/CHIBI-Verse/chibiverse-nft/consts"
 	"github.com/CHIBI-Verse/chibiverse-nft/internal/upload_service"
 	"github.com/CHIBI-Verse/chibiverse-nft/utils"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type Watcher struct {
@@ -72,14 +73,14 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 			fmt.Printf("Token ID: %s\n", vLog.Topics[3])
 			fmt.Printf("Token ID: %s\n", vLog.Topics[3].Big())
 
-			req.UploadNFT(int(vLog.Topics[3].Big().Int64()))
+			fmt.Print(utils.Reveal(int(vLog.Topics[3].Big().Int64())))
 
-			// token, err := instance.TokenURI(&bind.CallOpts{}, vLog.Topics[3].Big())
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
+			token, err := instance.TokenURI(&bind.CallOpts{}, vLog.Topics[3].Big())
+			if err != nil {
+				log.Fatal(err)
+			}
 
-			// fmt.Printf("Token URI: %s\n", token)
+			fmt.Printf("Token URI: %s\n", token)
 
 		}
 
@@ -111,8 +112,6 @@ func (svc *Watcher) Watch() {
 	}
 
 	contractAddress := common.HexToAddress(cfg.AddressOfToken().String())
-	// contractAddress := common.HexToAddress("0xa56ce629F47FA04ea21bC23dc19e7d58D3A44c2C")
-	// contractAddress := common.HexToAddress("0x60e4d786628fea6478f785a6d7e704777c86a7c6")
 	query := ethereum.FilterQuery{
 		// FromBlock: big.NewInt(13817018),
 		// ToBlock:   big.NewInt(13827018),

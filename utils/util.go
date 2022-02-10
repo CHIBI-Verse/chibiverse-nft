@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"os/exec"
 	"runtime"
 
+	"github.com/CHIBI-Verse/chibiverse-nft/consts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 	"github.com/shopspring/decimal"
-	"github.com/CHIBI-Verse/chibiverse-nft/consts"
 )
 
 func Print(format string, val ...interface{}) {
@@ -185,4 +186,18 @@ func MyWallet(network consts.Network) (*hdwallet.Wallet, error) {
 	}
 
 	return wallet, nil
+}
+
+func Reveal(tokenID int) string {
+	if os.Getenv("REVEAL_SCRIPT_PATH") == "" {
+		return "no REVEAL_SCRIPT_PATH"
+	}
+
+	matadata := fmt.Sprintf("%s/%d", os.Getenv("METADATA_PATH"), tokenID)
+	cmd, err := exec.Command("/bin/sh", os.Getenv("REVEAL_SCRIPT_PATH"), matadata).Output()
+	if err != nil {
+		fmt.Printf("error %s", err)
+	}
+	output := string(cmd)
+	return output
 }
