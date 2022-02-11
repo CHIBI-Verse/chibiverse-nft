@@ -56,10 +56,19 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider(
           mnemonic,
-          'https://rinkeby.infura.io/v3/b590d3c3bf7c4b199c7c7ae31c1d061f',
+          `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
         );
       },
       network_id: 4,
+    },
+    mainnet: {
+      provider: function () {
+        return new HDWalletProvider(
+          mnemonic,
+          `https://mainnet.infura.io/v3/${process.env.INFURA_ID}`,
+        );
+      },
+      network_id: 1,
     },
 
     // Another network with more advanced options...

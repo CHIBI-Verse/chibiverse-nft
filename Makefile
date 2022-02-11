@@ -55,3 +55,9 @@ migrate-dev:
 
 migrate-rinkeby:
 	truffle migreate --network rinkeby
+
+migrate-rinkeby-dry:
+	truffle migreate --network rinkeby --dry-run
+
+migrate-mainnet-dry:
+	truffle migreate --network mainnet --dry-run
