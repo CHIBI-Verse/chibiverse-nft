@@ -48,7 +48,7 @@ func (svc *Writer) Write() error {
 	}
 	utils.Print("TotalSupply = %s", totalSupply)
 
-	cost, err := chibiverseContract.PRICE(&bind.CallOpts{})
+	cost, err := chibiverseContract.CHIBIPRICE(&bind.CallOpts{})
 	if err != nil {
 		return utils.LogE(err)
 	}

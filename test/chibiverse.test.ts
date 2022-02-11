@@ -9,6 +9,7 @@ import { getWeb3 } from '../utils/util';
 import { testActors } from '../utils/test_util';
 
 const prefixUri = 'ipfs://__CID__/';
+const hiddenUri = 'ipfs://__CID__/hidden';
 
 const ganacheOpts = {
   // verbose: true,
@@ -31,7 +32,7 @@ beforeEach(async () => {
   chibiVerse = (await chibiVerse
     .deploy({
       data: ChibiVerseContract.bytecode,
-      arguments: [prefixUri, ''],
+      arguments: [prefixUri, '', hiddenUri],
     })
     .send(actors.ownerTx)) as any as ChibiVerse;
 
@@ -47,7 +48,7 @@ describe('Mint', () => {
   it('first mint token id must be 1', async () => {
     const actors = await testActors(web3);
     const amount = 1;
-    let cost = await chibiVerse.methods.PRICE().call();
+    let cost = await chibiVerse.methods.CHIBI_PRICE().call();
     // Mint
     await chibiVerse.methods
       .mint(amount)
@@ -60,7 +61,7 @@ describe('Mint', () => {
       try {
         const actors = await testActors(web3);
         const amount = 2;
-        let cost = await chibiVerse.methods.PRICE().call();
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         // Mint
         await chibiVerse.methods
           .mint(amount)
@@ -77,7 +78,7 @@ describe('Mint', () => {
     let walletBeforeMint = await chibiVerse.methods
       .walletOfOwner(actors.acc1Addr)
       .call();
-    let cost = await chibiVerse.methods.PRICE().call();
+    let cost = await chibiVerse.methods.CHIBI_PRICE().call();
     // Mint
     await chibiVerse.methods
       .mint(amount)
@@ -96,7 +97,7 @@ describe('Mint', () => {
       try {
         const actors = await testActors(web3);
         const amount = 21;
-        let cost = await chibiVerse.methods.PRICE().call();
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         // Mint
         await chibiVerse.methods
           .mint(amount)
@@ -110,7 +111,7 @@ describe('Mint', () => {
     await expect(async () => {
       try {
         const actors = await testActors(web3);
-        let cost = await chibiVerse.methods.PRICE().call();
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         let maxSupply = await chibiVerse.methods.MAX_CHIBI().call();
         let maxAmountPerTX = await chibiVerse.methods
           .MAX_CHIBI_PURCHASE()
@@ -137,7 +138,7 @@ describe('Mint', () => {
     await expect(async () => {
       try {
         const actors = await testActors(web3);
-        let cost = await chibiVerse.methods.PRICE().call();
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         let maxSupply = await chibiVerse.methods.MAX_CHIBI().call();
         let maxAmountPerTX = await chibiVerse.methods
           .MAX_CHIBI_PURCHASE()
@@ -176,7 +177,7 @@ describe('Mint', () => {
     await expect(async () => {
       try {
         const actors = await testActors(web3);
-        let cost = await chibiVerse.methods.PRICE().call();
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         let maxSupply = await chibiVerse.methods.MAX_CHIBI().call();
         let maxAmountPerTX = await chibiVerse.methods
           .MAX_CHIBI_PURCHASE()
@@ -211,7 +212,7 @@ describe('Revealed', () => {
     const revealed = await chibiVerse.methods.revealed().call();
     expect(revealed).toEqual(false);
     const amount = 1;
-    let cost = await chibiVerse.methods.PRICE().call();
+    let cost = await chibiVerse.methods.CHIBI_PRICE().call();
     // Mint
     await chibiVerse.methods
       .mint(amount)
@@ -235,7 +236,7 @@ describe('Revealed', () => {
     let revealed = await chibiVerse.methods.revealed().call();
     expect(revealed).toEqual(true);
     const amount = 1;
-    let cost = await chibiVerse.methods.PRICE().call();
+    let cost = await chibiVerse.methods.CHIBI_PRICE().call();
     // Mint
     await chibiVerse.methods
       .mint(amount)
@@ -295,7 +296,7 @@ describe('Pause', () => {
         const paused = await chibiVerse.methods.paused().call();
         expect(paused).toEqual(true);
         const amount = 1;
-        let cost = await chibiVerse.methods.PRICE().call();
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         // Mint
         await chibiVerse.methods
           .mint(amount)
@@ -378,6 +379,83 @@ describe('Giveaway', () => {
     expect(walletAfterMint.length - walletBeforeMint.length).toEqual(1);
     let tokenID1Owner = await chibiVerse.methods.ownerOf(1).call();
     expect(tokenID1Owner).toEqual(actors.acc1Addr);
+  });
+  it('giveaway reserve must reduce', async () => {
+    const actors = await testActors(web3);
+    let reserveBeforeClaim = await chibiVerse.methods.GIEVAWAY_RESERVE().call();
+    let claimable = await chibiVerse.methods.claimable(actors.acc1Addr).call();
+    expect(claimable).toEqual(false);
+    await chibiVerse.methods
+      .addToGiveawayList(actors.acc1Addr)
+      .send(actors.ownerTx);
+    claimable = await chibiVerse.methods.claimable(actors.acc1Addr).call();
+    expect(claimable).toEqual(true);
+    let walletBeforeMint = await chibiVerse.methods
+      .walletOfOwner(actors.acc1Addr)
+      .call();
+    expect(walletBeforeMint.length).toEqual(0);
+    // Mint
+    await chibiVerse.methods.claim().send(actors.acc1Tx);
+    let walletAfterMint = await chibiVerse.methods
+      .walletOfOwner(actors.acc1Addr)
+      .call();
+    expect(walletAfterMint.length - walletBeforeMint.length).toEqual(1);
+    let tokenID1Owner = await chibiVerse.methods.ownerOf(1).call();
+    expect(tokenID1Owner).toEqual(actors.acc1Addr);
+    let reserveAfterClaim = await chibiVerse.methods.GIEVAWAY_RESERVE().call();
+    expect(Number(reserveBeforeClaim) - Number(reserveAfterClaim)).toEqual(1);
+  });
+  it('can not claim giveaway over reserve', async () => {
+    await expect(async () => {
+      try {
+        const actors = await testActors(web3);
+        let reserveBeforeClaim = await chibiVerse.methods
+          .GIEVAWAY_RESERVE()
+          .call();
+        let claimable = await chibiVerse.methods
+          .claimable(actors.acc1Addr)
+          .call();
+        expect(claimable).toEqual(false);
+        await chibiVerse.methods
+          .addToGiveawayList(actors.acc1Addr)
+          .send(actors.ownerTx);
+        claimable = await chibiVerse.methods.claimable(actors.acc1Addr).call();
+        expect(claimable).toEqual(true);
+        let walletBeforeMint = await chibiVerse.methods
+          .walletOfOwner(actors.acc1Addr)
+          .call();
+        expect(walletBeforeMint.length).toEqual(0);
+        // Mint
+        await chibiVerse.methods.claim().send(actors.acc1Tx);
+        let walletAfterMint = await chibiVerse.methods
+          .walletOfOwner(actors.acc1Addr)
+          .call();
+        expect(walletAfterMint.length - walletBeforeMint.length).toEqual(1);
+        let tokenID1Owner = await chibiVerse.methods.ownerOf(1).call();
+        expect(tokenID1Owner).toEqual(actors.acc1Addr);
+        claimable = await chibiVerse.methods.claimable(actors.acc1Addr).call();
+        expect(claimable).toEqual(false);
+        let reserveAfterClaim = await chibiVerse.methods
+          .GIEVAWAY_RESERVE()
+          .call();
+        expect(Number(reserveBeforeClaim) - Number(reserveAfterClaim)).toEqual(
+          1,
+        );
+        await chibiVerse.methods
+          .addToGiveawayList(actors.acc2Addr)
+          .send(actors.ownerTx);
+        claimable = await chibiVerse.methods.claimable(actors.acc2Addr).call();
+        expect(claimable).toEqual(true);
+        walletBeforeMint = await chibiVerse.methods
+          .walletOfOwner(actors.acc2Addr)
+          .call();
+        expect(walletBeforeMint.length).toEqual(0);
+        // Mint acc2
+        await chibiVerse.methods.claim().send(actors.acc2Tx);
+      } catch (error) {
+        throw error;
+      }
+    }).rejects.toThrow('Max gievaway supply exceeded!');
   });
   it('can not claim giveaway again', async () => {
     await expect(async () => {
@@ -469,66 +547,100 @@ describe('Giveaway', () => {
 describe('Withdraw', () => {
   it('can withdraw', async () => {
     const actors = await testActors(web3);
-
     let balanceBeforeWithdraw = await web3.eth.getBalance(actors.ownerAddr);
-
     const amount = 10;
-
     let walletBeforeMint = await chibiVerse.methods
       .walletOfOwner(actors.acc1Addr)
       .call();
-    let cost = await chibiVerse.methods.PRICE().call();
-
+    let cost = await chibiVerse.methods.CHIBI_PRICE().call();
     const totalPrice = Number(cost) * amount;
-
     // Mint
     await chibiVerse.methods
       .mint(amount)
       .send({ ...actors.acc1Tx, value: totalPrice });
-
     let walletAfterMint = await chibiVerse.methods
       .walletOfOwner(actors.acc1Addr)
       .call();
-
     expect(walletAfterMint.length - walletBeforeMint.length).toEqual(amount);
-
     await chibiVerse.methods.withdraw().send(actors.ownerTx);
-
     let balanceAfterWithdraw = await web3.eth.getBalance(actors.ownerAddr);
-
     expect(Number(balanceAfterWithdraw)).toBeGreaterThan(
       Number(balanceBeforeWithdraw),
     );
   });
-
   it('can withdraw only owner', async () => {
     await expect(async () => {
       try {
         const actors = await testActors(web3);
-
         const amount = 10;
-
         let walletBeforeMint = await chibiVerse.methods
           .walletOfOwner(actors.acc1Addr)
           .call();
-        let cost = await chibiVerse.methods.PRICE().call();
-
+        let cost = await chibiVerse.methods.CHIBI_PRICE().call();
         const totalPrice = Number(cost) * amount;
-
         // Mint
         await chibiVerse.methods
           .mint(amount)
           .send({ ...actors.acc1Tx, value: totalPrice });
-
         let walletAfterMint = await chibiVerse.methods
           .walletOfOwner(actors.acc1Addr)
           .call();
-
         expect(walletAfterMint.length - walletBeforeMint.length).toEqual(
           amount,
         );
-
         await chibiVerse.methods.withdraw().send(actors.acc1Tx);
+      } catch (error) {
+        throw error;
+      }
+    }).rejects.toThrow('not the owner');
+  });
+});
+
+describe('Ownable', () => {
+  it('can get owner', async () => {
+    const actors = await testActors(web3);
+
+    let owner = await chibiVerse.methods.owner().call();
+
+    expect(owner).toEqual(actors.ownerAddr);
+  });
+
+  it('can change owner', async () => {
+    const actors = await testActors(web3);
+
+    let owner = await chibiVerse.methods.owner().call();
+
+    expect(owner).toEqual(actors.ownerAddr);
+
+    await chibiVerse.methods
+      .transferOwnership(actors.acc1Addr)
+      .send(actors.ownerTx);
+
+    owner = await chibiVerse.methods.owner().call();
+
+    expect(owner).toEqual(actors.acc1Addr);
+  });
+
+  it('can change owner by onlyOwner', async () => {
+    await expect(async () => {
+      try {
+        const actors = await testActors(web3);
+
+        let owner = await chibiVerse.methods.owner().call();
+
+        expect(owner).toEqual(actors.ownerAddr);
+
+        await chibiVerse.methods
+          .transferOwnership(actors.acc1Addr)
+          .send(actors.ownerTx);
+
+        owner = await chibiVerse.methods.owner().call();
+
+        expect(owner).toEqual(actors.acc1Addr);
+
+        await chibiVerse.methods
+          .transferOwnership(actors.acc2Addr)
+          .send(actors.ownerTx);
       } catch (error) {
         throw error;
       }

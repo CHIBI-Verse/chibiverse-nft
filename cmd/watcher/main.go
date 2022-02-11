@@ -12,11 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type HiddenMetadata struct {
-	Name  string `json:"name" xml:"name"`
-	Email string `json:"email" xml:"email"`
-}
-
 func main() {
 	cfg := consts.NewConfig()
 	fmt.Printf("Network : %s\n", cfg.Network())
