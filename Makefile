@@ -50,3 +50,8 @@ truffle-compile:
 	if [ ! -d bindings/chibiverse ]; then mkdir bindings/chibiverse ; fi
 	abigen --abi=abigenBindings/abi/ChibiVerse.abi --bin=abigenBindings/bin/ChibiVerse.bin --pkg chibiverse --out bindings/chibiverse/bindings.go
 	
+migrate-dev:
+	truffle migreate --network development
+
+migrate-rinkeby:
+	truffle migreate --network rinkeby

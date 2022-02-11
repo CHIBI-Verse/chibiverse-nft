@@ -18,10 +18,13 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
-//
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+
+const fs = require('fs');
+const mnemonic = fs.readFileSync('.secret').toString().trim();
+
+// const HDWalletProvider = require('truffle-hdwallet-provider')
+require('dotenv').config();
 
 module.exports = {
   /**
@@ -44,8 +47,21 @@ module.exports = {
     development: {
       host: '127.0.0.1', // Localhost (default: none)
       port: 8545, // Standard Ethereum port (default: none)
+      provider: function () {
+        return new HDWalletProvider(mnemonic, 'http://127.0.0.1:8545/');
+      },
       network_id: '*', // Any network (default: none)
     },
+    rinkeby: {
+      provider: function () {
+        return new HDWalletProvider(
+          mnemonic,
+          'https://rinkeby.infura.io/v3/b590d3c3bf7c4b199c7c7ae31c1d061f',
+        );
+      },
+      network_id: 4,
+    },
+
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -71,6 +87,10 @@ module.exports = {
     // network_id: 2111,   // This network is yours, in the cloud.
     // production: true    // Treats this network as if it was a public net. (default: false)
     // }
+  },
+
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_API_KEY,
   },
 
   // Set default mocha options here, use special reporters etc.

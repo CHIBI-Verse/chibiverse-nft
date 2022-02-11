@@ -14,3 +14,5 @@ types
 .env
 
 ipfs_submarine
+
+.secret
