@@ -11,6 +11,7 @@ type Network string
 const (
 	Mainnet    Network = "mainnet"
 	Ropten     Network = "ropten"
+	Rinkeby    Network = "rinkeby"
 	GanacheCLI Network = "ganache-cli"
 	BSCTest    Network = "bsctest"
 	BSCMain    Network = "bscmain"

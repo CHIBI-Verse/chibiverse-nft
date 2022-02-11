@@ -13,6 +13,8 @@ func GetClient(network Network) (*ethclient.Client, error) {
 		networkURL = "https://data-seed-prebsc-2-s2.binance.org:8545/"
 	} else if network == BSCMain {
 		networkURL = "https://bsc-dataseed.binance.org/"
+	} else if network == Rinkeby {
+		networkURL = "https://rinkeby-light.eth.linkpool.io/"
 	}
 
 	client, err := ethclient.Dial(networkURL)
@@ -31,6 +33,8 @@ func GetWsClient(network Network) (*ethclient.Client, error) {
 		networkURL = ""
 	} else if network == BSCMain {
 		networkURL = ""
+	} else if network == Rinkeby {
+		networkURL = "wss://rinkeby-light.eth.linkpool.io/ws"
 	}
 
 	client, err := ethclient.Dial(networkURL)

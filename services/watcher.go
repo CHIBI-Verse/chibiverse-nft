@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"math/big"
@@ -12,7 +11,6 @@ import (
 	"github.com/CHIBI-Verse/chibiverse-nft/internal/upload_service"
 	"github.com/CHIBI-Verse/chibiverse-nft/utils"
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -55,38 +53,38 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 	logTransferSigHash := crypto.Keccak256Hash(logTransferSig)
 	// logApprovalSigHash := crypto.Keccak256Hash(LogApprovalSig)
 
-	fmt.Printf("Log Block Number: %d\n", vLog.BlockNumber)
-	fmt.Printf("Log Index: %d\n", vLog.Index)
+	// fmt.Printf("Log Block Number: %d\n", vLog.BlockNumber)
+	// fmt.Printf("Log Index: %d\n", vLog.Index)
 
 	switch vLog.Topics[0].Hex() {
 	case logTransferSigHash.Hex():
 		from := common.HexToAddress(vLog.Topics[1].Hex())
 		if from.String() == "0x0000000000000000000000000000000000000000" {
-			fmt.Printf("Log Name: Transfer [%s]\n", vLog.Topics[0].Hex())
-			fmt.Printf("From: %s\n", common.HexToAddress(vLog.Topics[1].Hex()))
-			fmt.Printf("From: %s\n", vLog.Topics[1])
-			fmt.Printf("From: %s\n", vLog.Topics[1].Big())
-			fmt.Printf("To: %s\n", common.HexToAddress(vLog.Topics[2].Hex()))
-			fmt.Printf("To: %s\n", vLog.Topics[2])
-			fmt.Printf("To: %s\n", vLog.Topics[2].Big())
-			fmt.Printf("Token ID: %s\n", common.HexToAddress(vLog.Topics[3].Hex()))
-			fmt.Printf("Token ID: %s\n", vLog.Topics[3])
+			// fmt.Printf("Log Name: Transfer [%s]\n", vLog.Topics[0].Hex())
+			// fmt.Printf("From: %s\n", common.HexToAddress(vLog.Topics[1].Hex()))
+			// fmt.Printf("From: %s\n", vLog.Topics[1])
+			// fmt.Printf("From: %s\n", vLog.Topics[1].Big())
+			// fmt.Printf("To: %s\n", common.HexToAddress(vLog.Topics[2].Hex()))
+			// fmt.Printf("To: %s\n", vLog.Topics[2])
+			// fmt.Printf("To: %s\n", vLog.Topics[2].Big())
+			// fmt.Printf("Token ID: %s\n", common.HexToAddress(vLog.Topics[3].Hex()))
+			// fmt.Printf("Token ID: %s\n", vLog.Topics[3])
 			fmt.Printf("Token ID: %s\n", vLog.Topics[3].Big())
 
-			fmt.Print(utils.Reveal(int(vLog.Topics[3].Big().Int64())))
+			fmt.Printf("Reveal : %s\n", utils.Reveal(int(vLog.Topics[3].Big().Int64())))
 
-			token, err := instance.TokenURI(&bind.CallOpts{}, vLog.Topics[3].Big())
-			if err != nil {
-				log.Fatal(err)
-			}
+			// token, err := instance.TokenURI(&bind.CallOpts{}, vLog.Topics[3].Big())
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
 
-			fmt.Printf("Token URI: %s\n", token)
+			// fmt.Printf("Token URI: %s\n", token)
 
 		}
 
 	default:
-		j, _ := json.MarshalIndent(vLog, "", " ")
-		fmt.Println(string(j))
+		// j, _ := json.MarshalIndent(vLog, "", " ")
+		// fmt.Println(string(j))
 
 	}
 }
