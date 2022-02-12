@@ -9,7 +9,7 @@ import { getWeb3 } from '../utils/util';
 import { testActors } from '../utils/test_util';
 
 const prefixUri = 'ipfs://__CID__/';
-const hiddenUri = 'ipfs://__CID__/hidden';
+const hiddenUri = 'ipfs://__CID__/hidden/';
 
 const ganacheOpts = {
   // verbose: true,
@@ -41,7 +41,7 @@ beforeEach(async () => {
 
   // console.log(`ChibiVerseAddr = `, chibiVerseAddr);
 
-  // await chibiVerse.methods.unpause().send(actors.ownerTx);
+  await chibiVerse.methods.unpause().send(actors.ownerTx);
 });
 
 describe('Mint', () => {

@@ -20,7 +20,7 @@ contract ChibiVerse is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
     uint256 public constant MAX_CHIBI = 100; // Max supply of Minted Chibi
     uint256 public constant CHIBI_PRICE = 0.006 ether; // Chibi price - 0.006 ETH
     // uint256 public constant MAX_GIEVAWAY_RESERVE = 50;
-    uint256 public constant MAX_GIEVAWAY_RESERVE = 1;
+    uint256 public constant MAX_GIEVAWAY_RESERVE = 10;
 
     Counters.Counter private supply;
     Counters.Counter private gievawaySupply;
@@ -41,6 +41,7 @@ contract ChibiVerse is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable {
         setUriPrefix(_uriPrefix);
         setUriSuffix(_uriSuffix);
         setHiddenMetadataUri(_hiddenMetadataUri);
+        _pause();
     }
 
     // modifier
