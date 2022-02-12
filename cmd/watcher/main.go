@@ -36,8 +36,8 @@ func main() {
 		str := fmt.Sprintf(`{
 			"name": "CHIBI #%d",
 			"description": "A collection of 10,000 NFTs minted on the Ethereum blockchain. Every character is created by a random algorithm which ensures that each character is unique and differentiated from the others.",
-			"image": "ipfs://QmdttDSCMFk3o6vseaNGjimQ2VFCfkcqwdv2uvjAmNQKxC",
-			"animation_url": "ipfs://QmSUoZUxAfjfXoF5aMYL1GuAPDrHGGjr72CdNB4Bni672Q",
+			"image": "ipfs://QmeTCAbU2iz1pkXxzQn4QqKnQeNYwpLPUndgPgsEWczEcv",
+			"animation_url": "ipfs://QmUXnbPS1F9rgbceP6B3eYirrPCM2R8HoEEeYETq7p7ugq",
 			"external_url": "https://chibiverse.fun",
 			"creator": "Maxvoy",
 			"attributes": [
