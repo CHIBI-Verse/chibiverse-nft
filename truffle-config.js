@@ -69,6 +69,9 @@ module.exports = {
         );
       },
       network_id: 1,
+      from: '0xeDAe97612193467f60586d8b17860e17D5f781e4',
+      // gas: 190000000,
+      gasPrice: 44000000000,
     },
 
     // Another network with more advanced options...

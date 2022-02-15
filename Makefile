@@ -54,10 +54,13 @@ migrate-dev:
 	truffle migreate --network development
 
 migrate-rinkeby:
-	truffle migreate --network rinkeby
+	truffle migreate --network rinkeby --reset
 
 migrate-rinkeby-dry:
-	truffle migreate --network rinkeby --dry-run
+	truffle migreate --network rinkeby --reset --dry-run
+
+# migrate-mainnet:
+# 	truffle migreate --network mainnet --reset --skip-dry-run
 
 migrate-mainnet-dry:
-	truffle migreate --network mainnet --dry-run
+	truffle migreate --network mainnet --reset --dry-run
