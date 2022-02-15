@@ -1,6 +1,9 @@
 package consts
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -29,13 +32,15 @@ func GetWsClient(network Network) (*ethclient.Client, error) {
 	networkURL := ""
 	if network == GanacheCLI {
 		networkURL = "ws://127.0.0.1:8545/ws"
-	} else if network == BSCTest {
-		networkURL = ""
+	} else if network == Mainnet {
+		networkURL = "wss://mainnet.infura.io/ws/v3/" + os.Getenv("INFURA_ID")
 	} else if network == BSCMain {
 		networkURL = ""
 	} else if network == Rinkeby {
 		networkURL = "wss://rinkeby-light.eth.linkpool.io/ws"
 	}
+
+	fmt.Printf("Endpoint : %s\n", networkURL)
 
 	client, err := ethclient.Dial(networkURL)
 	if err != nil {

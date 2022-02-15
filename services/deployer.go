@@ -29,7 +29,7 @@ func (svc *Deployer) Deploy() error {
 	}
 
 	// 1. Deploy TokenA contract
-	chibiverseAddr, _, _, err := chibiverse.DeployChibiverse(utils.MySendOpt(client, network), client, os.Getenv("PREFIX_URI"), os.Getenv("SUFFIX_URI"), os.Getenv("HIDDEN_URI"))
+	chibiverseAddr, _, _, err := chibiverse.DeployChibiverse(utils.MySendOpt(client, network), client, os.Getenv("PREFIX_URI"))
 	if err != nil {
 		return utils.LogE(err)
 	}

@@ -1,8 +1,6 @@
 package services
 
 import (
-	"encoding/json"
-	"fmt"
 	"math/big"
 
 	"github.com/CHIBI-Verse/chibiverse-nft/bindings/chibiverse"
@@ -54,35 +52,11 @@ func (svc *Writer) Write() error {
 	}
 	utils.Print("Cost = %s", cost)
 
-	paused, err := chibiverseContract.Paused(&bind.CallOpts{})
-	if err != nil {
-		return utils.LogE(err)
-	}
-
-	fmt.Println("Paused = ", paused)
-
-	if paused {
-		_, err = chibiverseContract.Unpause(utils.MySendOpt(client, network))
-		if err != nil {
-			return utils.LogE(err)
-		}
-
-	}
-
 	_, err = chibiverseContract.Mint(utils.MySendOptWithValue(utils.MySendOpt(client, network), cost), big.NewInt(1))
 	if err != nil {
 		return utils.LogE(err)
 	}
 	// utils.Print("Mint = %s", r)
-
-	walletOfOwner, err := chibiverseContract.WalletOfOwner(&bind.CallOpts{}, myAddr)
-	if err != nil {
-		return utils.LogE(err)
-	}
-
-	j, _ := json.MarshalIndent(walletOfOwner, "", " ")
-
-	fmt.Println(string(j))
 
 	return nil
 }

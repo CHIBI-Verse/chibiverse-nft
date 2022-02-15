@@ -96,7 +96,9 @@ func (svc *Watcher) Watch() {
 
 	cfg := svc.cfg
 
-	client, err := consts.GetWsClient(cfg.Network())
+	network := cfg.Network()
+
+	client, err := consts.GetWsClient(network)
 	// wss: //rpc-mainnet.matic.network or
 	// wss: //ws-matic-mainnet.chainstacklabs.com or
 	// wss: //rpc-mainnet.maticvigil.com/ws or
