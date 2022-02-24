@@ -6,6 +6,7 @@ import (
 
 	"github.com/CHIBI-Verse/chibiverse-nft/consts"
 	"github.com/CHIBI-Verse/chibiverse-nft/services"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -15,9 +16,33 @@ func main() {
 	fmt.Printf("METADATA_PATH : %s\n", os.Getenv("METADATA_PATH"))
 	fmt.Printf("REVEAL_SCRIPT_PATH : %s\n", os.Getenv("REVEAL_SCRIPT_PATH"))
 
-	services.NewWatcher(cfg).Watch()
+	go services.NewWatcher(cfg).Watch()
 
-	// e := echo.New()
+	e := echo.New()
+	e.Static("/metadata", os.Getenv("PUBLIC_PATH"))
+
+	// e.GET("/copy/:id", func(c echo.Context) error {
+	// 	id := c.Param("id")
+	// 	tokenID, err := strconv.Atoi(id)
+	// 	if err != nil {
+	// 		return echo.NewHTTPError(http.StatusNotFound, "Not Found.")
+	// 	}
+
+	// 	if tokenID < 1 || tokenID > 10000 {
+	// 		return echo.NewHTTPError(http.StatusNotFound, "Not Found.")
+	// 	}
+
+	// 	src := fmt.Sprintf("%s/%d", os.Getenv("METADATA_PATH"), tokenID)
+	// 	desc := fmt.Sprintf("%s/%d", os.Getenv("PUBLIC_PATH"), tokenID)
+
+	// 	utils.Copy(src, desc)
+
+	// 	return c.JSON(http.StatusOK, echo.Map{
+	// 		"src":  src,
+	// 		"desc": desc,
+	// 	})
+	// })
+
 	// e.GET("/metadata/:id", func(c echo.Context) error {
 	// 	id := c.Param("id")
 	// 	tokenID, err := strconv.Atoi(id)
@@ -49,5 +74,5 @@ func main() {
 
 	// 	return c.JSON(http.StatusOK, obj)
 	// })
-	// e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":1323"))
 }

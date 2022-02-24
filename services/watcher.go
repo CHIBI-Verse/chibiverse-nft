@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 
 	"github.com/CHIBI-Verse/chibiverse-nft/bindings/chibiverse"
 	"github.com/CHIBI-Verse/chibiverse-nft/consts"
@@ -71,6 +72,13 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 			// fmt.Printf("Token ID: %s\n", vLog.Topics[3])
 			fmt.Printf("Token ID: %s\n", vLog.Topics[3].Big())
 
+			src := fmt.Sprintf("%s/%d", os.Getenv("METADATA_PATH"), int(vLog.Topics[3].Big().Int64()))
+			desc := fmt.Sprintf("%s/%d", os.Getenv("PUBLIC_PATH"), int(vLog.Topics[3].Big().Int64()))
+
+			utils.Copy(src, desc)
+
+			fmt.Printf("Copy : %s\n", src)
+			fmt.Printf("To : %s\n", desc)
 			fmt.Printf("Reveal : %s\n", utils.Reveal(int(vLog.Topics[3].Big().Int64())))
 
 			// token, err := instance.TokenURI(&bind.CallOpts{}, vLog.Topics[3].Big())
