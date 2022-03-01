@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math/big"
@@ -203,6 +204,25 @@ func Reveal(tokenID int) string {
 	return output
 }
 
+func ensureDir(dirName string) error {
+	err := os.Mkdir(dirName, os.ModeDir)
+	if err == nil {
+		return nil
+	}
+	if os.IsExist(err) {
+		// check that the existing path is a directory
+		info, err := os.Stat(dirName)
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			return errors.New("path exists but is not a directory")
+		}
+		return nil
+	}
+	return err
+}
+
 func Copy(src, dst string) (int64, error) {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
@@ -218,6 +238,11 @@ func Copy(src, dst string) (int64, error) {
 		return 0, err
 	}
 	defer source.Close()
+
+	err = ensureDir(os.Getenv("PUBLIC_PATH"))
+	if err != nil {
+		return 0, err
+	}
 
 	destination, err := os.Create(dst)
 	if err != nil {

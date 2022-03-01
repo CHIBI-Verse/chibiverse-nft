@@ -73,10 +73,19 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 			// fmt.Printf("Token ID: %s\n", vLog.Topics[3])
 			fmt.Printf("Token ID: %s\n", vLog.Topics[3].Big())
 
-			src := fmt.Sprintf("%s/%d", os.Getenv("METADATA_PATH"), int(vLog.Topics[3].Big().Int64()))
-			desc := fmt.Sprintf("%s/%d", os.Getenv("PUBLIC_PATH"), int(vLog.Topics[3].Big().Int64()))
+			if os.Getenv("PUBLIC_PATH") != "" {
+				src := fmt.Sprintf("%s/%d", os.Getenv("METADATA_PATH"), int(vLog.Topics[3].Big().Int64()))
+				desc := fmt.Sprintf("%s/%d", os.Getenv("PUBLIC_PATH"), int(vLog.Topics[3].Big().Int64()))
 
-			utils.Copy(src, desc)
+				_, err := utils.Copy(src, desc)
+				if err != nil {
+					fmt.Printf("Error : %s\n", err.Error())
+
+				} else {
+					fmt.Printf("Copy : %s\n", src)
+					fmt.Printf("To : %s\n", desc)
+				}
+			}
 
 			if os.Getenv("LineToken") != "" {
 				owner := common.HexToAddress(vLog.Topics[2].Hex())
@@ -84,8 +93,6 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 				notify.Notify(msg)
 			}
 
-			fmt.Printf("Copy : %s\n", src)
-			fmt.Printf("To : %s\n", desc)
 			fmt.Printf("Reveal : %s\n", utils.Reveal(int(vLog.Topics[3].Big().Int64())))
 
 			// token, err := instance.TokenURI(&bind.CallOpts{}, vLog.Topics[3].Big())
