@@ -92,9 +92,9 @@ func main() {
 	// 	return c.JSON(http.StatusOK, obj)
 	// })
 
-	if os.Getenv("LineToken") != "" {
+	if os.Getenv("LINE_TOKEN") != "" {
 
-		notify.Notify("chibiverse watcher is started.")
+		notify.Notify("started.")
 	}
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", os.Getenv("WATCHER_PORT"))))

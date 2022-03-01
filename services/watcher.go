@@ -87,7 +87,7 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 				}
 			}
 
-			if os.Getenv("LineToken") != "" {
+			if os.Getenv("LINE_TOKEN") != "" {
 				owner := common.HexToAddress(vLog.Topics[2].Hex())
 				msg := fmt.Sprintf("address %s mint token id %d", owner, int(vLog.Topics[3].Big().Int64()))
 				notify.Notify(msg)

@@ -14,7 +14,7 @@ func Notify(m string) {
 	data.Set("message", m)
 
 	req, _ := http.NewRequest("POST", "https://notify-api.line.me/api/notify", strings.NewReader(data.Encode()))
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("LineToken"))
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("LINE_TOKEN"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	client := &http.Client{}
