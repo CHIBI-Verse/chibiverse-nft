@@ -10,6 +10,7 @@ import (
 	"github.com/CHIBI-Verse/chibiverse-nft/bindings/chibiverse"
 	"github.com/CHIBI-Verse/chibiverse-nft/consts"
 	"github.com/CHIBI-Verse/chibiverse-nft/internal/upload_service"
+	"github.com/CHIBI-Verse/chibiverse-nft/pkg/notify"
 	"github.com/CHIBI-Verse/chibiverse-nft/utils"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -76,6 +77,12 @@ func handleLog(vLog types.Log, instance *chibiverse.Chibiverse, req upload_servi
 			desc := fmt.Sprintf("%s/%d", os.Getenv("PUBLIC_PATH"), int(vLog.Topics[3].Big().Int64()))
 
 			utils.Copy(src, desc)
+
+			if os.Getenv("LineToken") != "" {
+				owner := common.HexToAddress(vLog.Topics[2].Hex())
+				msg := fmt.Sprintf("address %s mint token id %d", owner, int(vLog.Topics[3].Big().Int64()))
+				notify.Notify(msg)
+			}
 
 			fmt.Printf("Copy : %s\n", src)
 			fmt.Printf("To : %s\n", desc)

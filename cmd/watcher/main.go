@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/CHIBI-Verse/chibiverse-nft/consts"
+	"github.com/CHIBI-Verse/chibiverse-nft/pkg/notify"
 	"github.com/CHIBI-Verse/chibiverse-nft/services"
 	"github.com/labstack/echo/v4"
 )
@@ -74,5 +75,11 @@ func main() {
 
 	// 	return c.JSON(http.StatusOK, obj)
 	// })
+
+	if os.Getenv("LineToken") != "" {
+
+		notify.Notify("chibiverse watcher is started.")
+	}
+
 	e.Logger.Fatal(e.Start(":1323"))
 }
